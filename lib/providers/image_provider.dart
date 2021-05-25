@@ -56,4 +56,27 @@ class ImageProvider with ChangeNotifier {
       throw error;
     }
   }
+
+  Future<void> fetchImagesPage() async {
+    final Uri url = Uri.https('www.flickr.com', 'services/rest/', {
+      'method': 'flickr.interestingness.getList',
+      'api_key': 'a974e5257d5a0baef2fbf31fdb1c396e',
+      'format': 'json',
+      'per_page': '$pageSize',
+      'page': '$currentPage',
+    });
+    try {
+      final response = await http.get(url);
+      if (response.statusCode != 200) {
+        throw Exception('fetch error');
+      }
+      final jsonData =
+          json.decode(response.body.substring(14, response.body.length - 1));
+      _items = _updateItemWithNewImages(jsonData);
+      print('fetch!');
+      notifyListeners();
+    } catch (error) {
+      throw error;
+    }
+  }
 }

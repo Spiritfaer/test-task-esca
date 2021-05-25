@@ -4,17 +4,43 @@ import 'package:provider/provider.dart';
 import '../widgets/image_item.dart' as app;
 import '../providers/image_provider.dart' as app;
 
-class ImageGrid extends StatelessWidget {
+class ImageGrid extends StatefulWidget {
+  @override
+  _ImageGridState createState() => _ImageGridState();
+}
+
+class _ImageGridState extends State<ImageGrid> {
+  late app.ImageProvider imageProvider;
+  ScrollController _scrollController = new ScrollController();
+
+  @override
+  void initState() {
+    imageProvider = Provider.of<app.ImageProvider>(context, listen: false);
+    _scrollController.addListener(() {
+      if (_scrollController.position.maxScrollExtent ==
+          _scrollController.offset) {
+        print('end');
+      }
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final imagesList =
-        Provider.of<app.ImageProvider>(context, listen: false).items;
+    final imagesList = imageProvider.items;
 
     return GridView.builder(
+      controller: _scrollController,
       padding: const EdgeInsets.all(8),
       itemCount: imagesList.length,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
+        crossAxisCount: 2,
         crossAxisSpacing: 4,
         mainAxisSpacing: 4,
       ),

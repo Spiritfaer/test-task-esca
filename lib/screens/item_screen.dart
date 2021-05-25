@@ -16,7 +16,7 @@ class ItemScreen extends StatelessWidget {
           width: screenSize.width,
           height: screenSize.height,
           child: Image.network(
-            image.path,
+            image.pathPreview,
             fit: BoxFit.cover,
           ),
         ),

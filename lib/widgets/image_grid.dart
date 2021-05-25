@@ -5,7 +5,6 @@ import '../widgets/image_item.dart' as app;
 import '../providers/image_provider.dart' as app;
 
 class ImageGrid extends StatelessWidget {
-  bool test = true;
   @override
   Widget build(BuildContext context) {
     final imagesList =

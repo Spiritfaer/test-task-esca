@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
           accentColor: Colors.orange,
         ),
         routes: {
-          '/': (ctx) => app.MainScreen(),
+          Navigator.defaultRouteName: (ctx) => app.MainScreen(),
           app.ItemScreen.routeName: (ctx) => app.ItemScreen(),
         },
       ),

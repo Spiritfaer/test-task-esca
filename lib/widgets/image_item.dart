@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import '../screens/item_screen.dart' as app;
 import '../model/image.dart' as app;
@@ -19,13 +20,13 @@ class ImageItem extends StatelessWidget {
       child: Container(
         height: 150,
         width: 150,
-        child: _image.pathPreview == app.plaseHolder
-            ? Image.asset(app.plaseHolder)
-            : FadeInImage.assetNetwork(
-                placeholder: app.plaseHolder,
-                image: _image.pathPreview,
-                fit: BoxFit.cover,
-              ),
+        child: CachedNetworkImage(
+          imageUrl: _image.pathPreview,
+          fit: BoxFit.cover,
+          errorWidget: (context, url, error) => Container(
+            child: Icon(Icons.error),
+          ),
+        ),
       ),
     );
   }

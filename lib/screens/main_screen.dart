@@ -34,11 +34,18 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(MainScreen.screenName)),
-      body: _isLoading
-          ? Center(
+      body: Stack(
+        children: [
+          AnimatedOpacity(
+            opacity: _isLoading ? 1.0 : 0.0,
+            duration: Duration(seconds: 2),
+            child: Center(
               child: CircularProgressIndicator(),
-            )
-          : app.ImageGrid(),
+            ),
+          ),
+          if (!_isLoading) app.ImageGrid(),
+        ],
+      ),
     );
   }
 }

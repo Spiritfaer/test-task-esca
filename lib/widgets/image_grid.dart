@@ -20,6 +20,9 @@ class _ImageGridState extends State<ImageGrid> {
       if (_scrollController.position.maxScrollExtent ==
           _scrollController.offset) {
         print('end');
+        setState(() {
+          imageProvider.fetchNextImagesPage();
+        });
       }
     });
     super.initState();
@@ -33,8 +36,9 @@ class _ImageGridState extends State<ImageGrid> {
 
   @override
   Widget build(BuildContext context) {
+    imageProvider = Provider.of<app.ImageProvider>(context);
     final imagesList = imageProvider.items;
-
+    print(imagesList.length);
     return GridView.builder(
       controller: _scrollController,
       padding: const EdgeInsets.all(8),

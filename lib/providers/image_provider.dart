@@ -6,12 +6,14 @@ import 'package:http/http.dart' as http;
 import '../model/image.dart' as app;
 
 class ImageProvider with ChangeNotifier {
-  late List<app.Image> _items;
+  List<app.Image> _items = [];
   final int pageSize = 10;
   final int maxPages = 5;
   int currentPage = 1;
+  bool _isLoading = false;
 
   List<app.Image> get items => [..._items];
+  bool get isLoading => _isLoading;
 
   app.Image _parsImage(Map<String, dynamic> imageData) {
     final imageTitle = imageData['title'];
@@ -37,6 +39,7 @@ class ImageProvider with ChangeNotifier {
   }
 
   Future<void> fetchImages() async {
+    _isLoading = true;
     final Uri url = Uri.https('www.flickr.com', 'services/rest/', {
       'method': 'flickr.interestingness.getList',
       'api_key': 'a974e5257d5a0baef2fbf31fdb1c396e',
@@ -51,13 +54,15 @@ class ImageProvider with ChangeNotifier {
           json.decode(response.body.substring(14, response.body.length - 1));
       _items = _updateItemWithNewImages(jsonData);
       print('fetch!');
+      _isLoading = false;
       notifyListeners();
     } catch (error) {
       throw error;
     }
   }
 
-  Future<void> fetchImagesPage() async {
+  Future<void> fetchNextImagesPage() async {
+    _isLoading = true;
     final Uri url = Uri.https('www.flickr.com', 'services/rest/', {
       'method': 'flickr.interestingness.getList',
       'api_key': 'a974e5257d5a0baef2fbf31fdb1c396e',
@@ -68,13 +73,15 @@ class ImageProvider with ChangeNotifier {
     try {
       final response = await http.get(url);
       if (response.statusCode != 200) {
-        throw Exception('fetch error');
+        throw Exception('fetchNextImagesPage error');
       }
-      final jsonData =
-          json.decode(response.body.substring(14, response.body.length - 1));
-      _items = _updateItemWithNewImages(jsonData);
-      print('fetch!');
+      final jsonData = await json
+          .decode(response.body.substring(14, response.body.length - 1));
+      _items.addAll(_updateItemWithNewImages(jsonData));
+      print('fetchNextImagesPage!');
+      _isLoading = false;
       notifyListeners();
+      currentPage++;
     } catch (error) {
       throw error;
     }

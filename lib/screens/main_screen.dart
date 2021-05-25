@@ -20,7 +20,7 @@ class _MainScreenState extends State<MainScreen> {
     setState(() {
       _isLoading = true;
       Provider.of<app.ImageProvider>(context, listen: false)
-          .fetchImagesPage()
+          .fetchNextImagesPage()
           .then((value) {
         setState(() {
           _isLoading = false;

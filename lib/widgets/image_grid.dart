@@ -34,24 +34,39 @@ class _ImageGridState extends State<ImageGrid> {
     super.dispose();
   }
 
+  Widget _helpBuilder(app.ImageProvider imageProvider) {
+    if (imageProvider.isLoading) {
+      return Padding(
+        padding: const EdgeInsets.all(18.0),
+        child: Center(child: CircularProgressIndicator()),
+      );
+    } else if (imageProvider.isEnded) {
+      return Padding(
+        padding: const EdgeInsets.all(18.0),
+        child: Center(child: Text('You saw all images')),
+      );
+    }
+    return SizedBox();
+  }
+
   @override
   Widget build(BuildContext context) {
     imageProvider = Provider.of<app.ImageProvider>(context);
     final imagesList = imageProvider.items;
-    print(imagesList.length);
-    return GridView.builder(
-      controller: _scrollController,
-      padding: const EdgeInsets.all(8),
-      itemCount: imagesList.length,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 4,
-        mainAxisSpacing: 4,
-      ),
-      itemBuilder: (ctx, index) => ChangeNotifierProvider.value(
-        value: imagesList[index],
-        child: app.ImageItem(),
-      ),
-    );
+    return CustomScrollView(controller: _scrollController,
+        // shrinkWrap: true,
+        slivers: [
+          SliverGrid.count(
+            crossAxisCount: 3,
+            crossAxisSpacing: 4,
+            mainAxisSpacing: 4,
+            children: [
+              ...imagesList.map((e) => app.ImageItem(e)).toList(),
+            ],
+          ),
+          SliverToBoxAdapter(
+            child: _helpBuilder(imageProvider),
+          ),
+        ]);
   }
 }

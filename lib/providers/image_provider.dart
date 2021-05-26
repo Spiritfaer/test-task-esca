@@ -7,13 +7,19 @@ import '../model/image.dart' as app;
 
 class ImageProvider with ChangeNotifier {
   List<app.Image> _items = [];
-  final int pageSize = 10;
-  final int maxPages = 5;
+  final int _defaultPageSize = 10;
+  final int _maxPages = 5;
   int currentPage = 1;
   bool _isLoading = false;
+  bool _pagesEnded = false;
 
   List<app.Image> get items => [..._items];
   bool get isLoading => _isLoading;
+  bool get isEnded => _pagesEnded;
+
+  bool _isItLustPage(jsonData) {
+    return jsonData['photos']['page'] == jsonData['photos']['pages'];
+  }
 
   app.Image _parsImage(Map<String, dynamic> imageData) {
     final imageTitle = imageData['title'];
@@ -39,6 +45,9 @@ class ImageProvider with ChangeNotifier {
   }
 
   Future<void> fetchImages() async {
+    if (_isLoading || _pagesEnded) {
+      return;
+    }
     _isLoading = true;
     final Uri url = Uri.https('www.flickr.com', 'services/rest/', {
       'method': 'flickr.interestingness.getList',
@@ -53,7 +62,6 @@ class ImageProvider with ChangeNotifier {
       final jsonData =
           json.decode(response.body.substring(14, response.body.length - 1));
       _items = _updateItemWithNewImages(jsonData);
-      print('fetch!');
       _isLoading = false;
       notifyListeners();
     } catch (error) {
@@ -61,13 +69,16 @@ class ImageProvider with ChangeNotifier {
     }
   }
 
-  Future<void> fetchNextImagesPage() async {
+  Future<void> fetchNextImagesPage([bool firstPage = false]) async {
+    if (_isLoading || _pagesEnded) {
+      return;
+    }
     _isLoading = true;
     final Uri url = Uri.https('www.flickr.com', 'services/rest/', {
       'method': 'flickr.interestingness.getList',
       'api_key': 'a974e5257d5a0baef2fbf31fdb1c396e',
       'format': 'json',
-      'per_page': '$pageSize',
+      'per_page': !firstPage ? '$_defaultPageSize' : '${_defaultPageSize * 2}',
       'page': '$currentPage',
     });
     try {
@@ -78,10 +89,10 @@ class ImageProvider with ChangeNotifier {
       final jsonData = await json
           .decode(response.body.substring(14, response.body.length - 1));
       _items.addAll(_updateItemWithNewImages(jsonData));
-      print('fetchNextImagesPage!');
+      _pagesEnded = _isItLustPage(jsonData);
       _isLoading = false;
       notifyListeners();
-      currentPage++;
+      currentPage = firstPage ? currentPage + 2 : currentPage + 1;
     } catch (error) {
       throw error;
     }
